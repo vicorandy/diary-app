@@ -1,16 +1,17 @@
 const express = require('express');
 require('dotenv').config();
+const entriesRouter = require('./routes/routes');
 
 const app = express();
 const PORT = process.env || 3000;
 
 app.use(express.json());
 
-app.get('/api/v1/entries', (req, res) => {
-  res.status(200);
-  res.json({ messsage: 'fetch all entries' });
-});
-
+// app.get('/api/v1/entries', (req, res) => {
+//   res.status(200);
+//   res.json({ messsage: 'fetch all entries' });
+// });
+app.use('/api/v1/entries', entriesRouter);
 app.get('/api/v1/entries/:id', (req, res) => {
   const { id } = req.params;
   res.json({
