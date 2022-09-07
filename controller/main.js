@@ -1,3 +1,5 @@
+const { InvalidIdError } = require('../error/index');
+
 const getAllEntries = async function (req, res) {
   res.json({
     message: 'fecth',
@@ -6,6 +8,11 @@ const getAllEntries = async function (req, res) {
 
 const getSingleEntry = async function (req, res) {
   const { id } = req.params;
+  if (id !== 1234) {
+    const error = new InvalidIdError('the id entered was wrong');
+    res.json(error);
+    throw new InvalidIdError('the id entered was wrong');
+  }
   res.json({ id });
 };
 
