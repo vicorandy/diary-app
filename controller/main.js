@@ -1,26 +1,60 @@
+const { StatusCodes } = require('http-status-codes');
 const { InvalidIdError } = require('../error/index');
+const {
+  postEntry,
+  fetchAllEntries,
+  fetchSingleEntry,
+  modifyEntry,
+} = require('../db/queries');
+const pool = require('../db/bd');
 
-const getAllEntries = async function (req, res) {
-  res.json({
-    message: 'fecth',
+function getAllEntries(req, res) {
+  pool.query(fetchAllEntries, (error, result) => {
+    if (error) {
+      throw error;
+    }
+    res.status(StatusCodes.OK).json(result.rows);
   });
-};
+}
 
-const getSingleEntry = async function (req, res) {
+function getSingleEntry(req, res) {
   const { id } = req.params;
-  if (id !== 1234) {
-    const error = new InvalidIdError('the id entered was wrong');
-    res.json(error);
-    throw new InvalidIdError('the id entered was wrong');
-  }
-  res.json({ id });
-};
+  pool.query(fetchSingleEntry, [id], (error, result) => {
+    if (!result.rows.length) {
+      res.send('no entry with such ID');
+      throw new InvalidIdError('invalid ID');
+    }
+    if (error) {
+      throw error;
+    }
+    res.status(StatusCodes.OK).json(result.rows);
+  });
+}
 
-const createEntry = async function (req, res) {
-  res.send('entry created');
-};
+function createEntry(req, res) {
+  const { title, date, entry } = req.body;
+  pool.query(postEntry, [title, date, entry], (error) => {
+    if (error) {
+      throw error;
+    }
+    res.status(StatusCodes.CREATED).send('entry was logged successfully');
+  });
+}
 
-const editEntry = async function (req, res) {
-  res.send('entry has been edited');
-};
+function editEntry(req, res) {
+  const { id } = req.params;
+  const { entry } = req.body;
+  pool.query(fetchSingleEntry, [id], (error, result) => {
+    if (!result.rows.length) {
+      res.send('no entry with such ID');
+      throw new InvalidIdError('invalid ID');
+    }
+  });
+  pool.query(modifyEntry, [entry, id], (error) => {
+    if (error) {
+      throw error;
+    }
+    res.status(StatusCodes.OK).send('entry has been modified');
+  });
+}
 module.exports = { getAllEntries, getSingleEntry, createEntry, editEntry };

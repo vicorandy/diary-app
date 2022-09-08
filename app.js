@@ -13,5 +13,5 @@ app.use('/api/v1/entries', entriesRouter);
 app.use(notFoundError);
 
 app.listen(PORT, () => {
-  console.log('servers are listening on port 3000...');
+  // console.log('servers are listening on port 3000...');
 });

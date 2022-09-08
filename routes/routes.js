@@ -11,6 +11,6 @@ const entriesRouter = express.Router();
 entriesRouter.route('/').get(getAllEntries);
 entriesRouter.route('/:id').get(getSingleEntry);
 entriesRouter.route('/').post(createEntry);
-entriesRouter.route('/').put(editEntry);
+entriesRouter.route('/:id').put(editEntry);
 
 module.exports = entriesRouter;
