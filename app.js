@@ -1,11 +1,11 @@
+require('express-async-errors');
+require('dotenv').config();
 const express = require('express');
 const entriesRouter = require('./routes/routes');
 const notFoundError = require('./error/notFound');
-require('dotenv').config();
-require('express-async-errors');
 
 const app = express();
-const PORT = process.env || 3000;
+const PORT = process.env;
 
 app.use(express.json());
 

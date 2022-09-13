@@ -6,7 +6,7 @@ const {
   fetchSingleEntry,
   modifyEntry,
 } = require('../db/queries');
-const pool = require('../db/bd');
+const pool = require('../db/db');
 
 function getAllEntries(req, res) {
   pool.query(fetchAllEntries, (error, result) => {
@@ -21,7 +21,7 @@ function getSingleEntry(req, res) {
   const { id } = req.params;
   pool.query(fetchSingleEntry, [id], (error, result) => {
     if (!result.rows.length) {
-      res.send('no entry with such ID');
+      res.json({ message: 'no entry with such ID' });
       throw new InvalidIdError('invalid ID');
     }
     if (error) {
@@ -46,7 +46,7 @@ function editEntry(req, res) {
   const { entry } = req.body;
   pool.query(fetchSingleEntry, [id], (error, result) => {
     if (!result.rows.length) {
-      res.send('no entry with such ID');
+      res.json({ message: 'no entry with such ID' });
       throw new InvalidIdError('invalid ID');
     }
   });
