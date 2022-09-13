@@ -6,7 +6,7 @@ const {
   fetchSingleEntry,
   modifyEntry,
 } = require('../db/queries');
-const pool = require('../db/db');
+const pool = require('../db/bd');
 
 function getAllEntries(req, res) {
   pool.query(fetchAllEntries, (error, result) => {
