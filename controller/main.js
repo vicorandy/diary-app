@@ -1,60 +1,48 @@
 const { StatusCodes } = require('http-status-codes');
 const { InvalidIdError } = require('../error/index');
-const {
-  postEntry,
-  fetchAllEntries,
-  fetchSingleEntry,
-  modifyEntry,
-} = require('../db/queries');
-const pool = require('../db/bd');
+const Entries = require('../models/entries');
 
-function getAllEntries(req, res) {
-  pool.query(fetchAllEntries, (error, result) => {
-    if (error) {
-      throw error;
-    }
-    res.status(StatusCodes.OK).json(result.rows);
-  });
+async function getAllEntries(req, res) {
+  const entries = await Entries.findAll();
+  res.status(StatusCodes.OK).json({ data: entries });
 }
 
-function getSingleEntry(req, res) {
+async function getSingleEntry(req, res) {
   const { id } = req.params;
-  pool.query(fetchSingleEntry, [id], (error, result) => {
-    if (!result.rows.length) {
-      res.json({ message: 'no entry with such ID' });
-      throw new InvalidIdError('invalid ID');
-    }
-    if (error) {
-      throw error;
-    }
-    res.status(StatusCodes.OK).json(result.rows);
-  });
+  const entry = await Entries.findOne({ where: { id } });
+  if (!entry) {
+    res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: `no entry with the id: ${id}` });
+    throw new InvalidIdError(`no entry with the id: ${id}`);
+  }
+  res.status(StatusCodes.OK).json({ data: entry });
 }
 
-function createEntry(req, res) {
-  const { title, date, entry } = req.body;
-  pool.query(postEntry, [title, date, entry], (error) => {
-    if (error) {
-      throw error;
-    }
-    res.status(StatusCodes.CREATED).send('entry was logged successfully');
+async function createEntry(req, res) {
+  const { title, entry } = req.body;
+  const data = await Entries.create({
+    title,
+    entry,
   });
+  res
+    .status(StatusCodes.CREATED)
+    .json({ message: 'entry has been logged ', data });
 }
 
-function editEntry(req, res) {
+async function editEntry(req, res) {
   const { id } = req.params;
   const { entry } = req.body;
-  pool.query(fetchSingleEntry, [id], (error, result) => {
-    if (!result.rows.length) {
-      res.json({ message: 'no entry with such ID' });
-      throw new InvalidIdError('invalid ID');
-    }
-  });
-  pool.query(modifyEntry, [entry, id], (error) => {
-    if (error) {
-      throw error;
-    }
-    res.status(StatusCodes.OK).send('entry has been modified');
-  });
+
+  const data = await Entries.findOne({ where: { id } });
+  if (!data) {
+    res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ message: `no entry with the id: ${id}` });
+    throw new InvalidIdError(`no entry with the id: ${id}`);
+  }
+
+  await Entries.update({ entry }, { where: { id } });
+  res.status(StatusCodes.OK).json({ message: 'entry has been edited' });
 }
 module.exports = { getAllEntries, getSingleEntry, createEntry, editEntry };
