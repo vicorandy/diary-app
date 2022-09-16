@@ -9,6 +9,12 @@
 - [x] Users can edit specific diary entry.
 - [x] Users can fetch all diary entries.
 
+## API DOCUMENTATION
+> The API allowers user to log entries daily to the app, user can also edit a previuos logged entries and also fetch specific entries stored in thr data base. 
+
+Pivotal tracker was used as management tool for this project.
+[https://www.pivotaltracker.com/n/projects/2597332]
+
 ## Getting Started
 
 ### Prerequisites
