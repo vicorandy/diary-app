@@ -14,9 +14,9 @@ const db = new Sequelize(database, user, password, {
   },
 });
 
-// connecting db
-function connectDB() {
+// testing db connection
+function dbConnectionTest() {
   db.authenticate().then(() => console.log('database connected...'));
 }
 
-module.exports = { db, connectDB };
+module.exports = { db, dbConnectionTest };
