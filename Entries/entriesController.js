@@ -1,6 +1,6 @@
 const { StatusCodes } = require('http-status-codes');
-const { InvalidIdError } = require('../error/index');
-const Entries = require('../models/entries');
+const { InvalidIdError } = require('./entriesError');
+const Entries = require('./entriesModel');
 
 async function getAllEntries(req, res) {
   const entries = await Entries.findAll();

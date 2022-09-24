@@ -4,7 +4,7 @@ const {
   getSingleEntry,
   createEntry,
   editEntry,
-} = require('../controller/main');
+} = require('./entriesController');
 
 const entriesRouter = express.Router();
 

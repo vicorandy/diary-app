@@ -1,8 +1,8 @@
 require('express-async-errors');
 require('dotenv').config();
 const express = require('express');
-const entriesRouter = require('./routes/routes');
-const notFoundError = require('./error/notFound');
+const entriesRouter = require('./Entries/entriesRoutes');
+const notFoundError = require('./MiddelWare/notFound');
 
 const app = express();
 
