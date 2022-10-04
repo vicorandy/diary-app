@@ -18,4 +18,5 @@ async function start() {
     console.log(error.message);
   }
 }
+
 start();

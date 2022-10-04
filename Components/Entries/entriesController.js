@@ -33,7 +33,6 @@ async function createEntry(req, res) {
 async function editEntry(req, res) {
   const { id } = req.params;
   const { entry } = req.body;
-
   const data = await Entries.findOne({ where: { id } });
   if (!data) {
     res
@@ -41,8 +40,33 @@ async function editEntry(req, res) {
       .json({ message: `no entry with the id: ${id}` });
     throw new InvalidIdError(`no entry with the id: ${id}`);
   }
-
   await Entries.update({ entry }, { where: { id } });
   res.status(StatusCodes.OK).json({ message: 'entry has been edited' });
 }
-module.exports = { getAllEntries, getSingleEntry, createEntry, editEntry };
+
+async function deleteEntry(req, res) {
+  const { id } = req.params;
+  const data = await Entries.findOne({ where: { id } });
+
+  if (!data) {
+    res.status(StatusCodes.NOT_FOUND);
+    res.json({ message: `no entry with the id: ${id}` });
+    throw new InvalidIdError(`no entry with the id: id}`);
+  }
+
+  if (data) {
+    await Entries.destroy({ where: { id } });
+    res.status(StatusCodes.OK);
+    res.json({
+      message: `the entry with the id: ${id} has been deleted sucessfully`,
+    });
+  }
+}
+
+module.exports = {
+  getAllEntries,
+  getSingleEntry,
+  createEntry,
+  editEntry,
+  deleteEntry,
+};
