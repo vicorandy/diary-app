@@ -31,10 +31,11 @@ async function getSingleEntry(req, res) {
 
 // CREATING A NEW ENTRY
 async function createEntry(req, res) {
-  const { title, entry } = req.body;
+  const { title, entry, userid } = req.body;
   const data = await Entries.create({
     title,
     entry,
+    userid,
   });
   res
     .status(StatusCodes.CREATED)

@@ -10,7 +10,9 @@ const Entries = db.define(
     entry: {
       type: Sequelize.STRING,
     },
-
+    userid: {
+      type: Sequelize.INTEGER,
+    },
     date: {
       type: 'TIMESTAMP',
       defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
