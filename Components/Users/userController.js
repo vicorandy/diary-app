@@ -12,8 +12,9 @@ async function signUp(req, res) {
       password,
     });
 
+    const token = user.createJWT({ userid: user.id, username: user.firstname });
     res.status(StatusCodes.CREATED);
-    res.json({ message: 'user account was created successfully' }, user);
+    res.json({ message: 'user account was created successfully', user, token });
   } catch (error) {
     if (error.name === 'SequelizeUniqueConstraintError') {
       res.status(StatusCodes.UNAUTHORIZED);
@@ -22,6 +23,7 @@ async function signUp(req, res) {
           'This email address has already been registered to an account. ',
       });
     } else {
+      console.log(error);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR);
       res.json({ message: 'something went wrong' });
     }
@@ -30,30 +32,41 @@ async function signUp(req, res) {
 
 // FOR LOGGING INTO A USER ACCOUNT
 async function signIn(req, res) {
-  const { email, password } = req.body;
+  try {
+    // checking if all credentials are provided
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(StatusCodes.BAD_GATEWAY);
+      res.json({ message: 'please enter your email and password' });
+    }
 
-  if (!email || !password) {
-    res.status(StatusCodes.BAD_GATEWAY);
-    res.json({ message: 'please enter your email and password' });
+    // fetching user
+    const user = await User.findOne({ where: { email } });
+
+    // if the user does not exist
+    if (!user) {
+      res.status(StatusCodes.UNAUTHORIZED);
+      res.json({ message: 'invalid username or password' });
+    }
+
+    // comfirming if the user password is correct
+    const hash = user.password;
+    const isCorrect = await user.comparePassword(password, hash);
+    if (!isCorrect) {
+      res.status(StatusCodes.UNAUTHORIZED);
+      res.json({ message: 'invalid username or password' });
+    }
+
+    // creating jsonwebtoken
+    const token = user.createJWT({ userid: user.id, username: user.firstname });
+
+    // sending final response to client
+    res.status(StatusCodes.OK);
+    res.json({ message: 'login was successful', user, token });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    res.json({ message: 'Something went wrong' });
   }
-
-  const user = await User.findOne({ where: { email } });
-
-  if (!user) {
-    res.status(StatusCodes.UNAUTHORIZED);
-    res.json({ message: 'invalid username or password' });
-  }
-
-  const hash = user.password;
-  const isCorrect = await user.comparePassword(password, hash);
-
-  if (!isCorrect) {
-    res.status(StatusCodes.UNAUTHORIZED);
-    res.json({ message: 'invalid username or password' });
-  }
-  // send web token
-  res.status(StatusCodes.OK);
-  res.json({ message: 'password is correct' });
 }
 
 async function deleteAccount(req, res) {
