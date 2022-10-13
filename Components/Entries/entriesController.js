@@ -4,7 +4,8 @@ const Entries = require('./entriesModel');
 
 // FECTHING ALL ENTRIES
 async function getAllEntries(req, res) {
-  const entries = await Entries.findAll();
+  const { userid } = req.user;
+  const entries = await Entries.findAll({ where: { userid } });
   const count = entries.length;
   res
     .status(StatusCodes.OK)
@@ -13,8 +14,9 @@ async function getAllEntries(req, res) {
 
 // FETCHING A SINGLE ENTRY
 async function getSingleEntry(req, res) {
+  const { userid } = req.user;
   const { id } = req.params;
-  const entry = await Entries.findOne({ where: { id } });
+  const entry = await Entries.findOne({ where: { id, userid } });
   const count = entry.length;
   if (!entry) {
     res
@@ -31,7 +33,8 @@ async function getSingleEntry(req, res) {
 
 // CREATING A NEW ENTRY
 async function createEntry(req, res) {
-  const { title, entry, userid } = req.body;
+  const { userid } = req.user;
+  const { title, entry } = req.body;
   const data = await Entries.create({
     title,
     entry,
@@ -44,6 +47,8 @@ async function createEntry(req, res) {
 
 // EDITING A SINGLE ENRTY
 async function editEntry(req, res) {
+  const { userid } = req.user;
+
   const { id } = req.params;
   const { entry, title } = req.body;
 
@@ -51,7 +56,7 @@ async function editEntry(req, res) {
     res.status(StatusCodes.BAD_REQUEST);
     res.json({ message: 'please enter all fields' });
   }
-  const data = await Entries.findOne({ where: { id } });
+  const data = await Entries.findOne({ where: { id, userid } });
   if (!data) {
     res
       .status(StatusCodes.NOT_FOUND)
@@ -59,15 +64,16 @@ async function editEntry(req, res) {
     throw new InvalidIdError(`no entry with the id: ${id}`);
   }
   if (data) {
-    await Entries.update({ entry, title }, { where: { id } });
+    await Entries.update({ entry, title }, { where: { id, userid } });
     res.status(StatusCodes.OK).json({ message: 'entry has been edited' });
   }
 }
 
 // DELETING A SINGLE ENTRY
 async function deleteEntry(req, res) {
+  const { userid } = req.user;
   const { id } = req.params;
-  const data = await Entries.findOne({ where: { id } });
+  const data = await Entries.findOne({ where: { id, userid } });
 
   if (!data) {
     res.status(StatusCodes.NOT_FOUND);
@@ -76,7 +82,7 @@ async function deleteEntry(req, res) {
   }
 
   if (data) {
-    await Entries.destroy({ where: { id } });
+    await Entries.destroy({ where: { id, userid } });
     res.status(StatusCodes.OK);
     res.json({
       message: `the entry with the id: ${id} has been deleted sucessfully`,

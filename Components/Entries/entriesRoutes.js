@@ -1,4 +1,5 @@
 const express = require('express');
+const auth = require('../../MiddelWare/auth');
 
 const {
   getAllEntries,
@@ -10,10 +11,10 @@ const {
 
 const entriesRouter = express.Router();
 
-entriesRouter.route('/').get(getAllEntries);
-entriesRouter.route('/:id').get(getSingleEntry);
-entriesRouter.route('/').post(createEntry);
-entriesRouter.route('/:id').put(editEntry);
-entriesRouter.route('/:id').delete(deleteEntry);
+entriesRouter.route('/').get(auth, getAllEntries);
+entriesRouter.route('/:id').get(auth, getSingleEntry);
+entriesRouter.route('/').post(auth, createEntry);
+entriesRouter.route('/:id').put(auth, editEntry);
+entriesRouter.route('/:id').delete(auth, deleteEntry);
 
 module.exports = entriesRouter;

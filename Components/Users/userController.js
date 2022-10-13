@@ -23,7 +23,6 @@ async function signUp(req, res) {
           'This email address has already been registered to an account. ',
       });
     } else {
-      console.log(error);
       res.status(StatusCodes.INTERNAL_SERVER_ERROR);
       res.json({ message: 'something went wrong' });
     }
