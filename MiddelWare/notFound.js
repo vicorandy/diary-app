@@ -1,9 +1,5 @@
-const { StatusCodes } = require('http-status-codes');
+function notFoundError(req, res) {
+  res.status(404).send('routes does not exsit');
+}
 
-
-const notFoundError = function (req, res) {
-  res.status(StatusCodes.NOT_FOUND).send('routes does not exsit')
-};
-
-module.exports=notFoundError
-
+module.exports = notFoundError;

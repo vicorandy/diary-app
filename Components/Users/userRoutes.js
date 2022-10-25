@@ -6,6 +6,7 @@ const {
   forgotPassword,
   verificationForPasswordReset,
   resetPassWord,
+  getUserInfo,
 } = require('./userController');
 
 const userRouter = express.Router();
@@ -16,5 +17,6 @@ userRouter.route('/forgot_passsword').post(forgotPassword);
 userRouter.route('/verification_code/:id').post(verificationForPasswordReset);
 userRouter.route('/reset_password/:id').patch(resetPassWord);
 userRouter.route('/delete_account').delete(deleteAccount);
+userRouter.route('/get_user_info').post(getUserInfo);
 
 module.exports = userRouter;

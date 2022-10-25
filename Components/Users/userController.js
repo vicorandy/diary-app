@@ -1,5 +1,10 @@
-const { StatusCodes } = require('http-status-codes');
+require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const { sendEmail } = require('../../Utils/email');
+const {
+  passwordValidator,
+  emailValidator,
+} = require('../../Utils/stringValidator');
 const User = require('./userModel');
 
 // FOR CREATING A USER ACCOUNT
@@ -7,6 +12,36 @@ const User = require('./userModel');
 async function signUp(req, res) {
   try {
     const { firstname, lastname, email, password } = req.body;
+    const isEmailCorrect = emailValidator(email);
+    const isPasswordCorrect = passwordValidator(password);
+
+    // validating user password
+    if (!isEmailCorrect) {
+      res.status(400);
+      res.json({
+        message: 'the email you entered appers to be miss the @ symbol',
+      });
+      return;
+    }
+
+    // validating password
+    if (!isPasswordCorrect) {
+      res.status(400);
+      res.json({
+        message:
+          'make sure your password has at least one upper-case, lowercase, symbol, number, and is has a minimun of 8 characters in length example (AAbb12#$)',
+      });
+      return;
+    }
+
+    // checking if user already exists
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      res.status(422);
+      res.json({ message: 'A user with this email already exists' });
+      return;
+    }
+
     const user = await User.create({
       firstname,
       lastname,
@@ -14,18 +49,35 @@ async function signUp(req, res) {
       password,
     });
 
-    const token = user.createJWT({ userid: user.id, username: user.firstname });
-    res.status(StatusCodes.CREATED);
-    res.json({ message: 'user account was created successfully', user, token });
+    const token = user.createJWT({
+      userid: user.id,
+      username: user.firstname,
+      useremail: user.email,
+    });
+
+    // creating new object without password to send back to the user
+    const data = {
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+    };
+
+    res.status(201);
+    res.json({
+      message: 'user account was created successfully',
+      user: data,
+      token,
+    });
   } catch (error) {
     if (error.name === 'SequelizeUniqueConstraintError') {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({
         message:
           'This email address has already been registered to an account. ',
       });
     } else {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+      res.status(500);
       res.json({ message: 'something went wrong' });
     }
   }
@@ -39,7 +91,7 @@ async function signIn(req, res) {
     // checking if all credentials are provided
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(StatusCodes.BAD_GATEWAY);
+      res.status(400);
       res.json({ message: 'please enter your email and password' });
     }
 
@@ -48,7 +100,7 @@ async function signIn(req, res) {
 
     // if the user does not exist
     if (!user) {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(404);
       res.json({ message: 'invalid username or password' });
     }
 
@@ -56,19 +108,61 @@ async function signIn(req, res) {
     const hash = user.password;
     const isCorrect = await user.comparePassword(password, hash);
     if (!isCorrect) {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(400);
       res.json({ message: 'invalid username or password' });
     }
 
     // creating jsonwebtoken
-    const token = user.createJWT({ userid: user.id, username: user.firstname });
+    const token = user.createJWT({
+      userid: user.id,
+      username: user.firstname,
+      useremail: user.email,
+    });
 
+    // creating new object without password to send back to the user
+    const data = {
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+    };
     // sending final response to client
-    res.status(StatusCodes.OK);
-    res.json({ message: 'login was successful', user, token });
+    res.status(200);
+    res.json({ message: 'login was successful', user: data, token });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    res.status(500);
     res.json({ message: 'Something went wrong' });
+  }
+}
+// ////////////////////////////////////////////////////////////////////////////
+
+// FOR RETRIEVING USE INFO
+// ////////////////////////////////////////////////////////////////////////////
+
+async function getUserInfo(req, res) {
+  try {
+    const { token } = req.body;
+
+    // checking for required input
+    if (!token) {
+      res.status(400);
+      res.json({ message: 'please provide a token' });
+      return;
+    }
+
+    // fetching user info
+    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
+
+    // sending user info
+    if (payLoad) {
+      res.status(200);
+      res.json({ message: 'your request was successful', userInfo: payLoad });
+    }
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      res.status(400);
+      res.json({ message: 'invalid token' });
+    }
   }
 }
 // ////////////////////////////////////////////////////////////////////////////
@@ -87,8 +181,9 @@ async function forgotPassword(req, res) {
     const { email } = req.body;
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      res.status(StatusCodes.NOT_FOUND);
+      res.status(404);
       res.json({ message: 'no user found with that email' });
+      return;
     }
     if (user) {
       const verificationCode = user.createVerificationCode();
@@ -99,7 +194,8 @@ async function forgotPassword(req, res) {
 
       // send verificationcode to user email
       await sendEmail(verificationCode, user);
-      res.status(StatusCodes.ACCEPTED);
+      delete user.password;
+      res.status(202);
       res.json({
         message: 'A verification code has been sent to your email',
         token,
@@ -107,7 +203,7 @@ async function forgotPassword(req, res) {
       });
     }
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    res.status(500);
     res.json({ message: 'somthing went wromg' });
   }
 }
@@ -122,7 +218,7 @@ async function verificationForPasswordReset(req, res) {
 
     const user = await User.findOne({ where: { id } });
     if (!user || !token || !verificationCode) {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({
         message:
           'Ensure all neccessary fields are provided with their correct credentials',
@@ -135,14 +231,14 @@ async function verificationForPasswordReset(req, res) {
       payLoad.verificationCode === verificationCode
     ) {
       const newToken = user.createJWT({ email: payLoad.email, isMatch: true });
-      res.status(StatusCodes.OK);
+      res.status(200);
       res.json({ newToken });
     } else {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({ message: 'invalid credentials' });
     }
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    res.status(500);
     res.json({ message: 'Something went wrong' });
   }
 }
@@ -157,7 +253,7 @@ async function resetPassWord(req, res) {
     const user = await User.findOne({ where: { id } });
 
     if (!user || !password || !token) {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({
         message:
           'Ensure all neccessary fields are provided with their correct credentials',
@@ -167,14 +263,14 @@ async function resetPassWord(req, res) {
     if (user.email === payLoad.email && payLoad.isMatch === true) {
       const hashPassword = await user.hashPassword(password);
       await User.update({ password: hashPassword }, { where: { id } });
-      res.status(StatusCodes.OK);
+      res.status(200);
       res.json({ message: 'you have successfully reset your password' });
     } else {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({ message: 'invalid credentials' });
     }
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    res.status(500);
     res.json({ message: 'Something went wrong' });
   }
 }
@@ -187,4 +283,5 @@ module.exports = {
   forgotPassword,
   resetPassWord,
   verificationForPasswordReset,
+  getUserInfo,
 };
