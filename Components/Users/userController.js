@@ -55,18 +55,13 @@ async function signUp(req, res) {
       useremail: user.email,
     });
 
-    // creating new object without password to send back to the user
-    const data = {
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-    };
+    // deleting hashed password
+    delete user.dataValues.password;
 
     res.status(201);
     res.json({
       message: 'user account was created successfully',
-      user: data,
+      user,
       token,
     });
   } catch (error) {
@@ -119,16 +114,12 @@ async function signIn(req, res) {
       useremail: user.email,
     });
 
-    // creating new object without password to send back to the user
-    const data = {
-      id: user.id,
-      firstname: user.firstname,
-      lastname: user.lastname,
-      email: user.email,
-    };
+    // deleting hashed password
+    delete user.dataValues.password;
+
     // sending final response to client
     res.status(200);
-    res.json({ message: 'login was successful', user: data, token });
+    res.json({ message: 'login was successful', user, token });
   } catch (error) {
     res.status(500);
     res.json({ message: 'Something went wrong' });
@@ -152,7 +143,6 @@ async function getUserInfo(req, res) {
 
     // fetching user info
     const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
-
     // sending user info
     if (payLoad) {
       res.status(200);
@@ -188,18 +178,20 @@ async function forgotPassword(req, res) {
     if (user) {
       const verificationCode = user.createVerificationCode();
       const token = user.createJWT(
-        { email, verificationCode },
+        { user, verificationCode },
         process.env.JWT_SECRETE
       );
 
       // send verificationcode to user email
       await sendEmail(verificationCode, user);
-      delete user.password;
+
       res.status(202);
       res.json({
         message: 'A verification code has been sent to your email',
         token,
-        user,
+        verificationcodelink: {
+          href: 'https://localhost3000/api/v1/users/verification_code',
+        },
       });
     }
   } catch (error) {
@@ -214,9 +206,10 @@ async function forgotPassword(req, res) {
 async function verificationForPasswordReset(req, res) {
   try {
     const { token, verificationCode } = req.body;
-    const { id } = req.params;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
+    const { user } = payLoad;
 
-    const user = await User.findOne({ where: { id } });
+    // making sure all fields are provided
     if (!user || !token || !verificationCode) {
       res.status(401);
       res.json({
@@ -225,17 +218,23 @@ async function verificationForPasswordReset(req, res) {
       });
       return;
     }
-    const payLoad = user.verifyJWT(token);
-    if (
-      user.email === payLoad.email &&
-      payLoad.verificationCode === verificationCode
-    ) {
-      const newToken = user.createJWT({ email: payLoad.email, isMatch: true });
+
+    // checking if the verifaction code sent by the user is correct
+    if (verificationCode === payLoad.verificationCode) {
+      const newToken = jwt.sign(
+        { user, isMatch: true },
+        process.env.JWT_SECRETE
+      );
       res.status(200);
-      res.json({ newToken });
+      res.json({
+        token: newToken,
+        resetpassword: {
+          href: 'https://localhost3000/api/v1/users/reset_password',
+        },
+      });
     } else {
       res.status(401);
-      res.json({ message: 'invalid credentials' });
+      res.json({ message: 'invalid token' });
     }
   } catch (error) {
     res.status(500);
@@ -248,20 +247,42 @@ async function verificationForPasswordReset(req, res) {
 // ////////////////////////////////////////////////////////////////////////////
 async function resetPassWord(req, res) {
   try {
-    const { password, token } = req.body;
-    const { id } = req.params;
-    const user = await User.findOne({ where: { id } });
+    const { token, password } = req.body;
+    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
+    const { user } = payLoad;
+    const isPasswordCorrect = passwordValidator(password);
 
-    if (!user || !password || !token) {
-      res.status(401);
+    // making sure all fields are provided
+    if (!token || !password) {
+      res.status(404);
       res.json({
         message:
           'Ensure all neccessary fields are provided with their correct credentials',
       });
     }
-    const payLoad = user.verifyJWT(token);
-    if (user.email === payLoad.email && payLoad.isMatch === true) {
-      const hashPassword = await user.hashPassword(password);
+
+    // checking if password is in a valid format
+    if (!isPasswordCorrect) {
+      res.status(400);
+      res.json({
+        message:
+          'make sure your password has at least one upper-case, lowercase, symbol, number, and is has a minimun of 8 characters in length example (AAbb12#$)',
+      });
+      return;
+    }
+
+    // checking if token is valid
+    if (!user) {
+      res.status(401);
+      res.json({ message: 'invalid token' });
+      return;
+    }
+
+    // resetting user password
+    if (payLoad.isMatch === true) {
+      const { id } = user;
+      const newUser = await User.findOne({ where: { id } });
+      const hashPassword = await newUser.hashPassword(password);
       await User.update({ password: hashPassword }, { where: { id } });
       res.status(200);
       res.json({ message: 'you have successfully reset your password' });
