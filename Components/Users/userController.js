@@ -37,8 +37,11 @@ async function signUp(req, res) {
     // checking if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      res.status(422);
-      res.json({ message: 'A user with this email already exists' });
+      res.status(409);
+      res.json({
+        message:
+          'This email address has already been registered to an account.',
+      });
       return;
     }
 
@@ -66,10 +69,10 @@ async function signUp(req, res) {
     });
   } catch (error) {
     if (error.name === 'SequelizeUniqueConstraintError') {
-      res.status(401);
+      res.status(409);
       res.json({
         message:
-          'This email address has already been registered to an account. ',
+          'This email address has already been registered to an account.',
       });
     } else {
       res.status(500);
@@ -88,6 +91,7 @@ async function signIn(req, res) {
     if (!email || !password) {
       res.status(400);
       res.json({ message: 'please enter your email and password' });
+      return;
     }
 
     // fetching user
@@ -96,7 +100,8 @@ async function signIn(req, res) {
     // if the user does not exist
     if (!user) {
       res.status(404);
-      res.json({ message: 'invalid username or password' });
+      res.json({ message: 'invalid email or password' });
+      return;
     }
 
     // comfirming if the user password is correct
@@ -104,7 +109,7 @@ async function signIn(req, res) {
     const isCorrect = await user.comparePassword(password, hash);
     if (!isCorrect) {
       res.status(400);
-      res.json({ message: 'invalid username or password' });
+      res.json({ message: 'invalid email or password' });
     }
 
     // creating jsonwebtoken
@@ -160,7 +165,40 @@ async function getUserInfo(req, res) {
 // FOR DELETING A USER ACCOUNT
 // ////////////////////////////////////////////////////////////////////////////
 async function deleteAccount(req, res) {
-  res.send('delete acc');
+  const { email, password } = req.body;
+
+  // checking for required input
+  if (!email || !password) {
+    res.status(400);
+    res.json({
+      message: 'please provide all required feilds (email and passsword)',
+    });
+    return;
+  }
+
+  // fetching user
+  const user = await User.findOne({ where: { email } });
+
+  // if the user does not exist
+  if (!user) {
+    res.status(404);
+    res.json({ message: 'no user with that email' });
+    return;
+  }
+
+  // comfirming if the user password is correct
+  const hash = user.password;
+  const isCorrect = await user.comparePassword(password, hash);
+  if (!isCorrect) {
+    res.status(401);
+    res.json({ message: 'you are not authorized to delete this account' });
+    return;
+  }
+  if (isCorrect) {
+    await User.destroy({ where: { email } });
+    res.status(200);
+    res.json({ message: 'you have successfully closed your account.' });
+  }
 }
 // ////////////////////////////////////////////////////////////////////////////
 
