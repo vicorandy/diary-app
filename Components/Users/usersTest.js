@@ -2,7 +2,6 @@ const chai = require('chai');
 const { expect } = require('chai');
 const chaiHttp = require('chai-http');
 const app = require('../../app');
-const User = require('./userModel');
 
 chai.use(chaiHttp);
 const user = {
@@ -14,10 +13,6 @@ const user = {
 let token;
 
 function usersTest() {
-  before(async () => {
-    const { email } = user;
-    await User.destroy({ where: { email } });
-  });
   describe('POST /users/signup', () => {
     it('shouild create a new user', (done) => {
       chai
@@ -64,7 +59,35 @@ function usersTest() {
         });
     });
   });
-  describe('POST /get_user_info', () => {});
+  describe('POST /get_user_info', () => {
+    it('gets user information using token', (done) => {
+      chai
+        .request(app)
+        .post('/api/v1/users/get_user_info')
+        .send({ token })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.userInfo.username).to.equal(user.firstname);
+          expect(res.body.userInfo.useremail).to.equal(user.email);
+          done();
+        });
+    });
+  });
+  describe('POST /api/v1/users/delete_account', () => {
+    it('delete a user account', (done) => {
+      chai
+        .request(app)
+        .delete('/api/v1/users/delete_account')
+        .send({ email: user.email, password: user.password })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal(
+            'you have successfully closed your account.'
+          );
+          done();
+        });
+    });
+  });
 }
 
 module.exports = usersTest;

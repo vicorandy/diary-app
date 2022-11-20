@@ -1,8 +1,5 @@
 const assert = require('assert');
-const {
-  //   passwordValidator,
-  emailValidator,
-} = require('./stringValidator');
+const { passwordValidator, emailValidator } = require('./stringValidator');
 
 function utilsTest() {
   describe('utils', () => {

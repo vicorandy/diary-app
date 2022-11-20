@@ -20,8 +20,6 @@ async function getAllEntries(req, res) {
 // ////////////////////////////////////////////////////////////////////////////
 
 async function getSingleEntry(req, res) {
-  // regex for email and password
-
   try {
     const { userid } = req.user;
     const { id } = req.params;
@@ -65,12 +63,23 @@ async function createEntry(req, res) {
   try {
     const { userid } = req.user;
     const { title, entry } = req.body;
+
+    // checking if all fields are provided
+    if (!title || !entry) {
+      res.status(400);
+      res.json({
+        message: 'please provide all a title and entry for your log',
+      });
+      return;
+    }
+
+    // creating a new entry
     const data = await Entries.create({
       title,
       entry,
       userid,
     });
-    res.status(201).json({ message: 'entry has been logged ', data });
+    res.status(201).json({ message: 'entry has been logged', data });
   } catch (error) {
     res.status(500);
     res.json({ messsage: 'Something went wrong' });
