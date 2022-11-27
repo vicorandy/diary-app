@@ -12,6 +12,7 @@ const User = require('./userModel');
 async function signUp(req, res) {
   try {
     const { firstname, lastname, email, password } = req.body;
+
     const isEmailCorrect = emailValidator(email);
     const isPasswordCorrect = passwordValidator(password);
 
@@ -19,7 +20,7 @@ async function signUp(req, res) {
     if (!isEmailCorrect) {
       res.status(400);
       res.json({
-        message: 'the email you entered appers to be miss the @ symbol',
+        message: 'the email you entered appers to be missing the @ symbol',
       });
       return;
     }
@@ -227,9 +228,6 @@ async function forgotPassword(req, res) {
       res.json({
         message: 'A verification code has been sent to your email',
         token,
-        verificationcodelink: {
-          href: 'https://localhost3000/api/v1/users/verification_code',
-        },
       });
     }
   } catch (error) {

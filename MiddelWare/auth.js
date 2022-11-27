@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const { StatusCodes } = require('http-status-codes');
 
 // AUTHORIZING USERS
 async function authorization(req, res, next) {
@@ -7,7 +6,7 @@ async function authorization(req, res, next) {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer')) {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({ message: 'invalid user token' });
       throw new Error('invalid user id');
     }
@@ -23,7 +22,7 @@ async function authorization(req, res, next) {
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       res.status(StatusCodes.UNAUTHORIZED);
-      res.json({ message: ' invalid user token' });
+      res.json({ message: 'invalid user token' });
     } else {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR);
       res.json({ message: 'Something went wrong' });

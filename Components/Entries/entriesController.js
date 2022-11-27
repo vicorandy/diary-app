@@ -114,7 +114,7 @@ async function editEntry(req, res) {
 
     // checking if resource belongs to the user
     if (!specificOldldEntry) {
-      res.status(200);
+      res.status(401);
       res.json({
         message: 'you do not have authorization to edit this resource',
       });
