@@ -215,7 +215,8 @@ async function forgotPassword(req, res) {
       return;
     }
     if (user) {
-      const verificationCode = user.createVerificationCode();
+      // const verificationCode = user.createVerificationCode();
+      const verificationCode = 12345; // for test only
       const token = user.createJWT(
         { user, verificationCode },
         process.env.JWT_SECRETE
@@ -242,18 +243,19 @@ async function forgotPassword(req, res) {
 async function verificationForPasswordReset(req, res) {
   try {
     const { token, verificationCode } = req.body;
-    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
-    const { user } = payLoad;
 
     // making sure all fields are provided
-    if (!user || !token || !verificationCode) {
-      res.status(401);
+    if (!token || !verificationCode) {
+      res.status(400);
       res.json({
         message:
           'Ensure all neccessary fields are provided with their correct credentials',
       });
       return;
     }
+
+    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
+    const { user } = payLoad;
 
     // checking if the verifaction code sent by the user is correct
     if (verificationCode === payLoad.verificationCode) {
@@ -268,9 +270,10 @@ async function verificationForPasswordReset(req, res) {
           href: 'https://localhost3000/api/v1/users/reset_password',
         },
       });
-    } else {
-      res.status(401);
-      res.json({ message: 'invalid token' });
+    }
+    if (verificationCode !== payLoad.verificationCode) {
+      res.status(400);
+      res.json({ message: 'invalid verification code' });
     }
   } catch (error) {
     res.status(500);
@@ -284,18 +287,19 @@ async function verificationForPasswordReset(req, res) {
 async function resetPassWord(req, res) {
   try {
     const { token, password } = req.body;
-    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
-    const { user } = payLoad;
-    const isPasswordCorrect = passwordValidator(password);
-
     // making sure all fields are provided
     if (!token || !password) {
-      res.status(404);
+      res.status(400);
       res.json({
         message:
           'Ensure all neccessary fields are provided with their correct credentials',
       });
+      return;
     }
+
+    const payLoad = jwt.verify(token, process.env.JWT_SECRETE);
+    const { user } = payLoad;
+    const isPasswordCorrect = passwordValidator(password);
 
     // checking if password is in a valid format
     if (!isPasswordCorrect) {

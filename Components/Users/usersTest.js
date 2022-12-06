@@ -24,6 +24,8 @@ const errorUserPassword = {
 };
 
 let token;
+let resetPassWordToken;
+let verificationToken;
 
 function usersTest() {
   describe('POST /users/signup', () => {
@@ -217,6 +219,7 @@ function usersTest() {
         .post('/api/v1/users/forgot_passsword')
         .send({ email: user.email })
         .end((err, res) => {
+          resetPassWordToken = res.body.token;
           expect(res).to.have.status(202);
           expect(res.body.message).to.equal(
             'A verification code has been sent to your email'
@@ -225,7 +228,83 @@ function usersTest() {
         });
     });
   });
-
+  describe('POST /verification_code', () => {
+    it('should throw an error if the resquest body is missing one or more fields', (done) => {
+      chai
+        .request(app)
+        .post('/api/v1/users/verification_code')
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal(
+            'Ensure all neccessary fields are provided with their correct credentials'
+          );
+          done();
+        });
+    });
+    it('should throw an error if the verification code is not correct', (done) => {
+      chai
+        .request(app)
+        .post('/api/v1/users/verification_code')
+        .send({ token: resetPassWordToken, verificationCode: 12344 })
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal('invalid verification code');
+          done();
+        });
+    });
+    it('should generate a new token if the verification code is correct', (done) => {
+      chai
+        .request(app)
+        .post('/api/v1/users/verification_code')
+        .send({ token: resetPassWordToken, verificationCode: 12345 })
+        .end((err, res) => {
+          verificationToken = res.body.token;
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property('token');
+          done();
+        });
+    });
+  });
+  describe('PATCH /reset_password', () => {
+    it('should throw an error if the resquest body is missing one or more fields', (done) => {
+      chai
+        .request(app)
+        .patch('/api/v1/users/reset_password')
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal(
+            'Ensure all neccessary fields are provided with their correct credentials'
+          );
+          done();
+        });
+    });
+    it('should throw an error if the password format is incorrect', (done) => {
+      chai
+        .request(app)
+        .patch('/api/v1/users/reset_password')
+        .send({ token: verificationToken, password: 'password' })
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.message).to.equal(
+            'make sure your password has at least one upper-case, lowercase, symbol, number, and is has a minimun of 8 characters in length example (AAbb12#$)'
+          );
+          done();
+        });
+    });
+    it('should reset the user password if the token is valid and the new password format is correct', (done) => {
+      chai
+        .request(app)
+        .patch('/api/v1/users/reset_password')
+        .send({ token: verificationToken, password: '1234AAbb#' })
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal(
+            'you have successfully reset your password'
+          );
+          done();
+        });
+    });
+  });
   describe('POST /delete_account', () => {
     it('should throw an error if either or both of the required fields is missing', (done) => {
       chai
