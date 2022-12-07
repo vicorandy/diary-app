@@ -215,8 +215,8 @@ async function forgotPassword(req, res) {
       return;
     }
     if (user) {
-      // const verificationCode = user.createVerificationCode();
-      const verificationCode = 12345; // for test only
+      const verificationCode = user.createVerificationCode();
+      // const verificationCode = 12345; // for test only
       const token = user.createJWT(
         { user, verificationCode },
         process.env.JWT_SECRETE
