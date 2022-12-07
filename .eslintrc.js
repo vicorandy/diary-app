@@ -5,10 +5,5 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  rules: {
-    'no-param-reassign': 'off',
-    'prefer-regex-literals': 'off',
-    'no-undef': 'off',
-    'no-console:': 'off',
-  },
+  rules: {},
 };
