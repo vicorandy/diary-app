@@ -1,6 +1,6 @@
 const http = require('http');
 const app = require('./app');
-const { dbConnectionTest } = require('./DB/Sequelize');
+const { dbConnectionTest } = require('./db/Sequelize');
 
 const { PORT } = process.env;
 app.set('port', PORT);
