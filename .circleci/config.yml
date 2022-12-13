@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  run tests:
+  run_tests:
     docker:
       - image: circle/node:10
     steps:
