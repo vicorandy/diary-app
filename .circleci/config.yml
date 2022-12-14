@@ -14,6 +14,10 @@ jobs:
           command: |
             npm install --save
 
+  run_unit_tests:
+    steps:
+      - checkout
+
       - run:
           name: Run Unit Test
           command: |
@@ -27,3 +31,4 @@ workflows:
   build_test:
     jobs:
       - run_tests
+      -run_unit_tests
