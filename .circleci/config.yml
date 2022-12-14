@@ -2,11 +2,12 @@ version: 2.1
 
 orbs:
 node: circleci/node@5
-win: circleci/windows@3
+win: circleci/windows@4.1.1
 
 jobs:
   run_tests:
-   
+   executor:
+      name: win/default # executor type
     steps:
       - checkout
 
@@ -25,7 +26,6 @@ jobs:
           path: test-results
 
 workflows:
-version: 2.1
-  build_:
+  build_test:
     jobs:
       - run_tests
