@@ -1,12 +1,14 @@
 version: 2.1
 
 orbs:
-node: circleci/node@v16.13.0
+node: circleci/node@5
+win: circleci/windows@4.1.1
 
-workflows:
-  build_test:
-    jobs:
+jobs:
   run_tests:
+   executor:
+      name: win/default # executor type
+      size: medium
     steps:
       - checkout
 
@@ -23,3 +25,9 @@ workflows:
           path: test_results
       - store_artifacts:
           path: test-results
+
+workflows:
+version: 2.1
+  build_test:
+    jobs:
+      - run_tests
