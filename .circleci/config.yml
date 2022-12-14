@@ -1,34 +1,63 @@
 version: 2.1
-
 orbs:
-node: circleci/node@5
-win: circleci/windows@4.1.1
+  node: circleci/node@5
+  win: circleci/windows@4.1.1
+#   # heroku: circleci/heroku@1.2.6
 
 jobs:
-  run_tests:
+  test:
+    executor:
+      name: win/default # executor type
+      size: medium
+
     steps:
       - checkout
+      - run: echo "test application"
+      - run: npm install
+      # - run: npm run test
 
-      - run:
-          name: Install npm dependencies
-          command: |
-            npm install --save
+  coverage:
+    executor:
+      name: win/default # executor type
+      size: medium
 
-  run_unit_tests:
     steps:
       - checkout
-
-      - run:
-          name: Run Unit Test
-          command: |
-            ./node_modules/mocha/bin/mocha test/ --reporter mochawesome --reporter-options reportDir=test-results,reportFilename=test-results
-      - store_test_results:
-          path: test_results
-      - store_artifacts:
-          path: test-results
-
+      - run: echo "test coverage"
+      - run: npm install
+      # - run: npm run coverage
 workflows:
-  build_test:
+  version: 2.1
+  test_coverage:
     jobs:
-      - run_tests
-      - run_unit_tests
+      - test
+      - coverage
+# version: 2.1
+
+# orbs:
+# node: circleci/node@5
+# win: circleci/windows@4.1.1
+
+# jobs:
+#   run_tests:
+#     steps:
+#       - checkout
+
+#       - run:
+#           name: Install npm dependencies
+#           command: |
+#             npm install --save
+
+#       - run:
+#           name: Run Unit Test
+#           command: |
+#             ./node_modules/mocha/bin/mocha test/ --reporter mochawesome --reporter-options reportDir=test-results,reportFilename=test-results
+#       - store_test_results:
+#           path: test_results
+#       - store_artifacts:
+#           path: test-results
+
+# workflows:
+#   build_test:
+#     jobs:
+#       - run_tests
