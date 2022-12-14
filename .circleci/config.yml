@@ -1,8 +1,8 @@
 version: 2.1
 jobs:
   run_tests:
-    docker:
-      - image: cimg/node:v16.13.0
+ orbs:
+  node: circleci/node@v16.13.0
     steps:
       - checkout
       - run:
