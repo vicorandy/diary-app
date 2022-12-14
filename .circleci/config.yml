@@ -1,6 +1,8 @@
 version: 2.1
+
 orbs:
 node: circleci/node@v16.13.0
+
 jobs:
   run_tests:
     steps:
@@ -17,6 +19,7 @@ jobs:
           path: test_results
       - store_artifacts:
           path: test-results
+
 workflows:
   build_test:
     jobs:
