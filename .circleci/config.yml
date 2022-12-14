@@ -4,7 +4,7 @@ orbs:
 node: circleci/node@v16.13.0
 
 jobs:
-  run_tests
+  run_tests:
     steps:
       - checkout
 
