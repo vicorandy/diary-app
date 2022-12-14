@@ -13,16 +13,15 @@ const testUser = {
   password: '1234AAbb#',
 };
 
-function entriesTest() {
+async function entriesTest() {
   chai.use(chaiHttp);
-  before((done) => {
+  await before(() => {
     chai
       .request(app)
       .post('/api/v1/users/signin')
       .send(testUser)
       .end((err, res) => {
         token = res.body.token;
-        done();
       });
   });
   describe('GET /entries', () => {
