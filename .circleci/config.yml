@@ -5,6 +5,7 @@ orbs:
 
 jobs:
   installingPackages:
+  working_directory: ~/circleci-node
     executor:
       name: win/default # executor type
       size: medium
@@ -22,8 +23,7 @@ jobs:
     steps:
       - checkout
       - run: npm install
-      - run: node server.js
-      - run: npm run localTest
+      - run: npm test
 
 workflows:
   version: 2.1
