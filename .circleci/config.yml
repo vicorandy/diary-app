@@ -6,7 +6,7 @@ jobs:
       - image: circleci/postgres:11-alpine-ram
         environment:
          USER: postgres
-          password: 08059911447Vic$
+          # password: 08059911447Vic$
           DATABASE: diarydb
           DB_PORT: 5432
           HOST: localhost
