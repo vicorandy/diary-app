@@ -21,10 +21,10 @@ async function authorization(req, res, next) {
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
-      res.status(StatusCodes.UNAUTHORIZED);
+      res.status(401);
       res.json({ message: 'invalid user token' });
     } else {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+      res.status(500);
       res.json({ message: 'Something went wrong' });
     }
   }
