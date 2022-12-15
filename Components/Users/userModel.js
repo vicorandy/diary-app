@@ -1,7 +1,7 @@
 const Sequalize = require('sequelize');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { db } = require('../../DB/Sequelize');
+const { db } = require('../../db/Sequelize');
 
 require('dotenv');
 
