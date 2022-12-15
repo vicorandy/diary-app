@@ -20,7 +20,7 @@ jobs:
       #       - v1-dependencies-
 
       - run: npm install
-      - run: node server.js
+      # - run: node server.js
       - run: npm test
 # using orbs
 # version: 2.1
