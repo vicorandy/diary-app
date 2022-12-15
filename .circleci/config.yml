@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@5
+  postgres: onehq/postgres@1.1.0
   win: circleci/windows@4.1.1
 
 jobs:
@@ -14,19 +15,19 @@ jobs:
       - run: npm install
       - run: node server.js
 
-  test:
-    executor:
-      name: win/default # executor type
-      size: medium
+  # test:
+  #   executor:
+  #     name: win/default # executor type
+  #     size: medium
 
-    steps:
-      - checkout
-      - run: npm install
-      - run: npm test
+  #   steps:
+  #     - checkout
+  #     - run: npm install
+  #     - run: npm test
 
 workflows:
   version: 2.1
   test_coverage:
     jobs:
       - installingPackages
-      - test
+      # - test
