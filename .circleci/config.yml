@@ -21,7 +21,7 @@ jobs:
 
       - run: npm install
       # - run: node server.js
-      - run: npm test
+      - run: npm run localTest
 # using orbs
 # version: 2.1
 # orbs:
