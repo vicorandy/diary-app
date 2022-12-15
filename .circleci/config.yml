@@ -12,6 +12,7 @@ jobs:
     steps:
       - checkout
       - run: npm install
+      - run: node server.js
 
   test:
     executor:
@@ -21,6 +22,7 @@ jobs:
     steps:
       - checkout
       - run: npm install
+      - run: node server.js
       - run: npm run localTest
 
 workflows:
