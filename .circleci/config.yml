@@ -5,7 +5,6 @@ orbs:
 
 jobs:
   installingPackages:
-  working_directory: ~/circleci-node
     executor:
       name: win/default # executor type
       size: medium
