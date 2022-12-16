@@ -4,6 +4,7 @@
   "description": "back end for diary app",
   "main": "app.js",
   "scripts": {
+    "start": "node server.js",
     "localTest": "mocha",
     "test": "nyc --reporter=html --reporter=text ./node_modules/.bin/mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
