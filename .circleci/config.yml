@@ -25,7 +25,8 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: node server.js
-      - run: npm ci:test
+         - run: yarn ci:test
+      
 # using orbs
 # version: 2.1
 # orbs:
