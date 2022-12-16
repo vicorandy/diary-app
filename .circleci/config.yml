@@ -20,8 +20,12 @@ jobs:
       #       - v1-dependencies-
 
       - run: npm install
-      - run: node server.js
-      # - run: npm run localTest
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      # - run: node server.js
+      - run: npm ci:test
 # using orbs
 # version: 2.1
 # orbs:
@@ -89,7 +93,7 @@ jobs:
 #           key: v1-dependencies-{{ checksum "package.json" }}
 
 #       # run tests!
-#       - run: yarn ci:test
+# - run: yarn ci:test
 
 #       - setup_remote_docker:
 #           docker_layer_caching: true
