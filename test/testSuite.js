@@ -1,7 +1,7 @@
 const usersTest = require('../Components/Users/usersTest');
 const entriesTest = require('../Components/Entries/entriesTest');
-const utilsTest = require('../Utils/test');
+// const utilsTest = require('../Utils/test');
 
-utilsTest();
+// utilsTest();
 usersTest();
 entriesTest();
