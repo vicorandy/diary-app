@@ -94,7 +94,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm ci:test
+      - run: yarn ci:test
 
       - setup_remote_docker:
           docker_layer_caching: true
