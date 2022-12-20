@@ -6,7 +6,7 @@ jobs:
     docker:
       - image: node:11.10.1
       - image: circleci/postgres:11-alpine-ram
-              environment:
+        environment:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: dairydb
@@ -33,7 +33,6 @@ jobs:
       - run: psql -c 'create database diarydb;' -U postgres
       - run: sequelize db:migrate --env test
       - run: npm run localTest
-    
 # using orbs
 # version: 2.1
 # orbs:
