@@ -31,6 +31,15 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: npm start
       # - run: npm run localTest
+      - run: mkdir ~/junit
+      - run: npm install mocha-junit-reporter
+      - run:
+          command: mocha test --reporter mocha-junit-reporter
+          environment:
+            MOCHA_FILE: ~/junit/test-results.xml
+          when: always
+      - store_test_results:
+          path: ~/junit
 # using orbs
 # version: 2.1
 # orbs:
