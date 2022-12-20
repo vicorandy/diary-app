@@ -6,6 +6,10 @@ jobs:
     docker:
       - image: node:11.10.1
       - image: circleci/postgres:11-alpine-ram
+       environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: example12
       - image: redis:latest
 
     working_directory: ~/circleci-node
@@ -26,7 +30,7 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: npm start
-      - run: npm run localTest
+      # - run: npm run localTest
 # using orbs
 # version: 2.1
 # orbs:
