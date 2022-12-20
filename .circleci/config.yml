@@ -31,9 +31,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: npm start
       # - run: npm run localTest
-      - run: mkdir ~/junit
-      
-      - run: npm install mocha-junit-reporter # just for CircleCI
+            - run: npm install mocha-junit-reporter # just for CircleCI
 
             - save_cache:
                 paths:
