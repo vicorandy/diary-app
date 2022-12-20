@@ -31,20 +31,20 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       # - run: npm start
       # - run: npm run localTest
-            - run: npm install mocha-junit-reporter # just for CircleCI
+      - run: npm install mocha-junit-reporter # just for CircleCI
 
-            - save_cache:
-                paths:
-                    - node_modules
-                key: v1-dependencies-{{ checksum "package-lock.json" }}
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
 
-            - run: mkdir reports
+      - run: mkdir reports
 
-            # Run mocha
-            - run:
-                name: npm test
-                command: ./node_modules/.bin/nyc ./node_modules/.bin/mocha --recursive --timeout=10000 --exit --reporter mocha-junit-reporter --reporter-options mochaFile=reports/mocha/test-results.xml
-                when: always
+        # Run mocha
+      - run:
+          name: npm test
+          command: ./node_modules/.bin/nyc ./node_modules/.bin/mocha --recursive --timeout=10000 --exit --reporter mocha-junit-reporter --reporter-options mochaFile=reports/mocha/test-results.xml
+          when: always
 # using orbs
 # version: 2.1
 # orbs:
