@@ -6,10 +6,6 @@ jobs:
     docker:
       - image: node:11.10.1
       - image: circleci/postgres:11-alpine-ram
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: dairydb
       - image: redis:latest
 
     working_directory: ~/circleci-node
@@ -29,9 +25,7 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: |
-          psql \
-          -d $TEST_DATABASE_URL \
+      # - run: npm start
       - run: npm run localTest
 # using orbs
 # version: 2.1
