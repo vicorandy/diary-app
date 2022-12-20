@@ -25,7 +25,7 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: npm run localTest
+      - run: node server.js --forceExit
       # - run: npm run localTest
 # using orbs
 # version: 2.1
