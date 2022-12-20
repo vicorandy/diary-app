@@ -29,9 +29,9 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: psql -c 'drop database if exists diarydb;' -U postgres
-      - run: psql -c 'create database diarydb;' -U postgres
-      - run: sequelize db:migrate --env test
+      - run: |
+          psql \
+          -d $TEST_DATABASE_URL \
       - run: npm run localTest
 # using orbs
 # version: 2.1
